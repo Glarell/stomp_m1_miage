@@ -1,13 +1,67 @@
 var socket;
 
+class client {
+
+    SEND(id,queue) {
+        return `SEND
+destination:/queue/${queue}
+receipt:message-${id}
+
+hello queue a^@`
+    }
+
+    SUBSCRIBE(id,queue) {
+        return `SUBSCRIBE
+id:${id}
+destination:/queue/${queue}
+ack:client
+
+^@`
+    }
+
+    UNSUBSCRIBE(id) {
+        return `UNSUBSCRIBE
+id:${id}
+
+^@`
+    }
+
+    BEGIN(transation) {
+        return `BEGIN
+transaction:${transation}
+
+^@`
+    }
+
+    COMMIT(transation) {
+        return `COMMIT
+transaction:${transation}
+
+^@`
+    }
+
+    DISCONNECT_START(id) {
+        return `DISCONNECT
+receipt:${id}
+^@`
+    }
+
+    DISCONNECT_END(id) {
+        return `RECEIPT
+receipt-id:${id}
+^@`
+    }
+}
+
 /* LISTENERS */
 $( document ).ready(function() {
     $('#btn_client').click(function (e) {
-
+        client = new Client();
         socket = new WebSocket('wss://localhost:8081');
 
         socket.onopen = function(e) {
             console.log("[open] Connection established");
+            socket
         };
 
         socket.onmessage = function(event) {
@@ -29,7 +83,9 @@ $( document ).ready(function() {
     });
 
     $('#btn_message').click(function (){
-        const message = $('#text_message').val();
+        const id = $('#text_message').val();
+        const message = client.SEND(id,"test");
         socket.send(message);
+        console.log(message)
     });
 });
