@@ -1,19 +1,7 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import IndexComponent from "./Component/IndexComponent";
-import http from "http";
+import * as express from 'express';
+import * as http from 'http';
 import * as WebSocket from 'ws';
-import express from 'express';
-
-
-const root = ReactDOM.createRoot(
-    document.getElementById('root') as HTMLElement
-);
-
-root.render(
-    <IndexComponent/>
-);
-
+import * as path from "path";
 
 class Server {
 
@@ -59,9 +47,12 @@ const app = express();
 //initialize a simple http server
 const server = http.createServer(app);
 
+let s:Server = new Server();
+
 app.get("/", (req: any, res: any) => {
-    res.send("hello world");
+    res.sendFile(path.resolve("./src/client/index.html"));
 });
+
 
 //initialize the WebSocket server instance
 const wss = new WebSocket.Server({ server });
