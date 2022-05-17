@@ -1,5 +1,6 @@
 import React, {SyntheticEvent} from "react";
 import ws from "ws";
+import server from '../Tmp/server';
 //npm install @types/node --save
 import * as http from "http";
 
@@ -9,7 +10,6 @@ export interface IndexComponentProperties {
 export interface IndexComponentState {
     message_content: string
 }
-
 
 export default class IndexComponent extends React.Component<IndexComponentProperties, IndexComponentState> {
 
