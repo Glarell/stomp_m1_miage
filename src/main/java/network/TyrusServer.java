@@ -12,8 +12,7 @@ public class TyrusServer {
         server = new Server ("localhost", 8080, "/stomp", MainServerEndpoint.class);
         try {
             server.start();
-            System.out.println("--- server is running");
-            System.out.println("--- press any key to stop the server");
+            System.out.println("--- Server is running ! ---");
             BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
             bufferRead.readLine();
         } catch (Exception e) {

@@ -6,23 +6,49 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Scanner;
 
 @ClientEndpoint
 public class MainClientEndpoint {
 
+    public final String new_line = System.lineSeparator();
+    public boolean first_received = false;
+
     @OnOpen
     public void onOpen(Session session) {
-        System.out.println("--- Connected " + session.getId());
         try{
-            session.getBasicRemote().sendText("Je suis connecté");
-        }catch (IOException e){
-            throw new RuntimeException(e);
+            StringBuilder stringBuilder = new StringBuilder();
+            // TYPE
+            stringBuilder.append("CONNECT").append(new_line);
+            //HEADERS
+            stringBuilder.append("accept-version:1.0").append(new_line);
+            stringBuilder.append("host:localhost").append(new_line);
+            // BLANK LINE
+            stringBuilder.append(new_line);
+            // END
+            stringBuilder.append("^@");
+            session.getBasicRemote().sendText(stringBuilder.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @OnMessage
-    public void onMessage(String message, Session session){
-        System.out.println("--- Received : " + message);
+    public void onMessage(String message, Session session) throws IOException {
+        Trame trame = TrameConstructor.parseTrameServeur(message);
+        if (trame != null) {
+            if (!first_received){
+                first_received = true;
+                if (trame.getType().equals("ERROR")){
+                    session.close();
+                }else{
+                    System.out.println(trame.toString());
+                }
+            }else{
+                System.out.println(trame.toString());
+            }
+        }
+
     }
 
     public static void main(String[] args){
@@ -30,8 +56,10 @@ public class MainClientEndpoint {
         try{
             URI uri = new URI("ws://localhost:8080/stomp/main");
             Session session = client.connectToServer(MainClientEndpoint.class, uri);
-            session.getBasicRemote().sendText("Je t'envoie un message");
-        } catch (DeploymentException | URISyntaxException | IOException e) {
+            while(true){
+
+            }
+        } catch (DeploymentException | URISyntaxException e) {
             e.printStackTrace();
         }
     }

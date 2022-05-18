@@ -9,6 +9,10 @@ public class TrameConstructor {
     public static final ArrayList<String> client_headers = new ArrayList<>(List.of("SEND","SUBSCRIBE","DISCONNECT","CONNECT"));
     public static final ArrayList<String> server_headers = new ArrayList<>(List.of("CONNECTED","MESSAGE","ERROR"));
 
+    public static Trame createTrame(){
+        return null;
+    }
+
     public static Trame parse(String message, ArrayList<String> default_headers){
         String new_line = System.lineSeparator();
         String[] lines = message.split(new_line);
