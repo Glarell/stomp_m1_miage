@@ -17,17 +17,16 @@ public class MainClientEndpoint {
     @OnOpen
     public void onOpen(Session session) {
         try{
-            StringBuilder stringBuilder = new StringBuilder();
             // TYPE
-            stringBuilder.append("CONNECT").append(new_line);
-            //HEADERS
-            stringBuilder.append("accept-version:1.0").append(new_line);
-            stringBuilder.append("host:localhost").append(new_line);
-            // BLANK LINE
-            stringBuilder.append(new_line);
-            // END
-            stringBuilder.append("^@");
-            session.getBasicRemote().sendText(stringBuilder.toString());
+            String stringBuilder = "CONNECT" + new_line +
+                    //HEADERS
+                    "accept-version:1.0" + new_line +
+                    "host:localhost" + new_line +
+                    // BLANK LINE
+                    new_line +
+                    // END
+                    "^@";
+            session.getBasicRemote().sendText(stringBuilder);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -39,7 +38,7 @@ public class MainClientEndpoint {
         if (trame != null) {
             if (!first_received){
                 first_received = true;
-                if (trame.getType().equals("ERROR")){
+                if (trame.isERROR()){
                     session.close();
                 }else{
                     System.out.println(trame.toString());

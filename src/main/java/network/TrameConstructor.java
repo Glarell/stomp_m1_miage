@@ -9,8 +9,8 @@ public class TrameConstructor {
     public static final ArrayList<String> client_headers = new ArrayList<>(List.of("SEND","SUBSCRIBE","DISCONNECT","CONNECT"));
     public static final ArrayList<String> server_headers = new ArrayList<>(List.of("CONNECTED","MESSAGE","ERROR"));
 
-    public static Trame createTrame(){
-        return null;
+    public static Trame createTrame(String type, HashMap<String, String> headers, String body){
+        return new Trame(type, headers, body);
     }
 
     public static Trame parse(String message, ArrayList<String> default_headers){

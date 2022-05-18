@@ -32,21 +32,19 @@ public class MainServerEndpoint {
         if(!users_connected.get(id)){
             Trame trame = TrameConstructor.parseTrameClient(message);
             System.out.println(trame.toString());
-            if (trame.getType().equals("CONNECT")){
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("CONNECTED").append(new_line);
-                stringBuilder.append("version:1.0").append(new_line);
-                stringBuilder.append("content-type:text/plain").append(new_line);
-                stringBuilder.append(new_line).append("^@");
-                session.getBasicRemote().sendText(stringBuilder.toString());
+            if (trame.isCONNECT()){
+                String stringBuilder = "CONNECTED" + new_line +
+                        "version:1.0" + new_line +
+                        "content-type:text/plain" + new_line +
+                        new_line + "^@";
+                session.getBasicRemote().sendText(stringBuilder);
             }else{
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("ERROR").append(new_line);
-                stringBuilder.append("version:1.0").append(new_line);
-                stringBuilder.append("content-type:text/plain").append(new_line);
-                stringBuilder.append(new_line).append("No Connect Frame in first place").append(new_line);
-                stringBuilder.append("^@");
-                session.getBasicRemote().sendText(stringBuilder.toString());
+                String stringBuilder = "ERROR" + new_line +
+                        "version:1.0" + new_line +
+                        "content-type:text/plain" + new_line +
+                        new_line + "No Connect Frame in first place" + new_line +
+                        "^@";
+                session.getBasicRemote().sendText(stringBuilder);
             }
         }else{
             Trame trame = TrameConstructor.parseTrameClient(message);
