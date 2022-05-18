@@ -8,7 +8,7 @@ public class App extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		primaryStage.setTitle("TP2 - Baignoire");
+		primaryStage.setTitle("Projet STOMP");
 		try {
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(getClass().getResource("/main_panel.fxml"));
