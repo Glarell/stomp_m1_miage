@@ -1,0 +1,25 @@
+Scénario de STOMP :
+
+Un client essaye de se connecter avec la Frame Connect :
+- Si Frame correcte alors le serveur renvoie connected
+- Si Frame incorrecte alors le serveur renvoie error
+
+Un client est connecté et souhaite s'abonner avec la frame Subscribe :
+- Il envoie la frame Subscribe sur le topic sur lequel s'abonner
+- En fonction du fonctionnement de l'application, on lui envoie une partie de la queue ou toute la queue
+
+Un client est subscribe et souhaite s'unsubscribe :
+- Le client envoie la frame unsubscribe et ne reçoit plus les messages, il est supprimé des utilisateurs
+
+Le serveur reçoit un nouveau messsage sur un topic :
+- Il ajoute ce message à la queue
+- Il envoie ce message à tout ceux abonnés à ce topic (FRAME MESSAGE).
+
+Un client souhaite se déconnecter :
+- Il envoie la frame disconnect
+
+
+Il faut gérer la/les queues, une queue contient toutes les informations d'un topic
+On peut avoir plusieurs queues
+
+On doit gérer les abonnements et la position du curseur des différents clients sur cet abonnnement.
