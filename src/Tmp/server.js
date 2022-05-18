@@ -1,45 +1,6 @@
 const http = require('http');
 const ws = require('ws');
 
-class Server {
-
-    MESSAGE(subscription,id,queue) {
-        return `MESSAGE
-subscription:${subscription}
-message-id:${id}
-destination:/queue/${queue}
-content-type:text/plain
-
-hello queue a^@`
-    }
-
-    RECEIPT(id) {
-        return `RECEIPT
-receipt-id:message-${id}
-
-^@`
-    }
-
-    ERROR(id,queue,content_length) {
-        return `ERROR
-receipt-id:message-${id}
-content-type:text/plain
-content-length:${content_length}
-message:malformed frame received
-
-The message:
------
-MESSAGE
-destined:/queue/${queue}
-receipt:message-${id}
-
-Hello queue ${queue}!
------
-Did not contain a destination header, which is REQUIRED
-for message propagation.
-^@`
-    }
-}
 $( document ).ready(function() {
     server = new Server();
     $('#btn_server').click(function (e) {

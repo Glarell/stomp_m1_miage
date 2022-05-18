@@ -51,6 +51,7 @@ receipt:${id}
 receipt-id:${id}
 ^@`
     }
+
 }
 
 /* LISTENERS */
