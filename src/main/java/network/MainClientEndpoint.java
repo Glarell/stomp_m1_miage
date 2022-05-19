@@ -19,6 +19,8 @@ public class MainClientEndpoint {
     public final String new_line = System.lineSeparator();
     public boolean first_received = false;
 
+    public static Session session;
+
     @OnOpen
     public void onOpen(Session session) {
         try{

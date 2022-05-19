@@ -45,7 +45,7 @@ public class TrameConstructor {
     }
 
     public static void main(String[] args) {
-        String test = "SEND\r\nid:Enzo\r\ntype:test\r\n\r\nCoucou les gens\r\n^@";
+        String test = "SEND\r\ndestination:/queue/a\r\ncontent-type:text/plain\r\n\r\nCoucou les gens\r\n^@";
         System.out.println(parseTrameClient(test).toString());
     }
 }

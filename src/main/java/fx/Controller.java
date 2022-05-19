@@ -7,6 +7,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 
+import java.io.IOException;
+
+import static network.MainClientEndpoint.session;
+
 public class Controller {
 
 
@@ -33,6 +37,6 @@ public class Controller {
     }
 
     public static void changeGrid(int x, int y, Button button) {
-        gridpane.add(button,y,x);
+            gridpane.add(button,y,x);
     }
 }
