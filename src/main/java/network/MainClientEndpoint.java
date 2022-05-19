@@ -7,6 +7,9 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 @ClientEndpoint
 public class MainClientEndpoint {
@@ -58,7 +61,13 @@ public class MainClientEndpoint {
             URI uri = new URI("ws://localhost:8080/stomp/main");
             session = client.connectToServer(MainClientEndpoint.class, uri);
             App.main(args);
+            session.getBasicRemote().sendText(TrameConstructor.createTrame("SEND", null, "Bonjour les gens").toSend());
+            while(true){
+
+            }
         } catch (DeploymentException | URISyntaxException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
