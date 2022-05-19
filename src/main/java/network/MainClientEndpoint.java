@@ -1,21 +1,20 @@
 package network;
 
 import fx.App;
-import fx.Button;
-import fx.Controller;
 import org.glassfish.tyrus.client.ClientManager;
 
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Scanner;
 
 @ClientEndpoint
 public class MainClientEndpoint {
 
     public final String new_line = System.lineSeparator();
     public boolean first_received = false;
+
+    public static Session session;
 
     @OnOpen
     public void onOpen(Session session) {
@@ -57,7 +56,7 @@ public class MainClientEndpoint {
         ClientManager client = ClientManager.createClient();
         try{
             URI uri = new URI("ws://localhost:8080/stomp/main");
-            Session session = client.connectToServer(MainClientEndpoint.class, uri);
+            session = client.connectToServer(MainClientEndpoint.class, uri);
             App.main(args);
         } catch (DeploymentException | URISyntaxException e) {
             e.printStackTrace();
