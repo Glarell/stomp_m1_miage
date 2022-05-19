@@ -58,16 +58,14 @@ public class MainClientEndpoint {
     public static void main(String[] args){
         ClientManager client = ClientManager.createClient();
         try{
-            URI uri = new URI("ws://localhost:8080/stomp/main");
+            URI uri = new URI("ws://localhost:8080/stomp/main/enzo");
             Session session = client.connectToServer(MainClientEndpoint.class, uri);
-            App.main(args);
-            session.getBasicRemote().sendText(TrameConstructor.createTrame("SEND", null, "Bonjour les gens").toSend());
+//            App.main(args);
+//            session.getBasicRemote().sendText(TrameConstructor.createTrame("TEST", null, "Bonjour les gens").toSend());
             while(true){
 
             }
         } catch (DeploymentException | URISyntaxException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }
