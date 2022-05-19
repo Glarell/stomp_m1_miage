@@ -1,3 +1,5 @@
+package fx;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,7 +13,7 @@ public class App extends Application {
 		primaryStage.setTitle("Projet STOMP");
 		try {
 			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(getClass().getResource("/main_panel.fxml"));
+			loader.setLocation(getClass().getResource("/main.fxml"));
 			Parent root = loader.load();
 			Scene scene = new Scene(root);
 			primaryStage.setScene(scene);

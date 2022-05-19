@@ -1,5 +1,8 @@
 package network;
 
+import fx.App;
+import fx.Button;
+import fx.Controller;
 import org.glassfish.tyrus.client.ClientManager;
 
 import javax.websocket.*;
@@ -55,9 +58,7 @@ public class MainClientEndpoint {
         try{
             URI uri = new URI("ws://localhost:8080/stomp/main");
             Session session = client.connectToServer(MainClientEndpoint.class, uri);
-            while(true){
-
-            }
+            App.main(args);
         } catch (DeploymentException | URISyntaxException e) {
             e.printStackTrace();
         }

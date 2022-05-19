@@ -10,7 +10,7 @@
     <properties>
         <project.build.sourceEncoding>UTF8</project.build.sourceEncoding>
         <project.bindist.dir>${project.basedir}/bindist</project.bindist.dir>
-        <project.main.classname>${project.groupId}.${project.artifactId}.Launcher</project.main.classname>
+        <project.main.classname>${project.groupId}.${project.artifactId}.fx.Launcher</project.main.classname>
         <project.bin.appname>run</project.bin.appname>
     </properties>
 
