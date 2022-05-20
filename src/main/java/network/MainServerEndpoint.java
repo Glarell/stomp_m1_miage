@@ -17,7 +17,7 @@ public class MainServerEndpoint {
     private static final Set<MainServerEndpoint> serverEndpoints = new CopyOnWriteArraySet<>();
     private static final HashMap<String, String> users = new HashMap<>();
     private static final HashMap<String, Session> users_sessions = new HashMap<>();
-    private static final HashMap<String, Boolean> users_connected = new HashMap<>();
+    private static final HashMap<String, Integer> users_connected = new HashMap<>();
     private static final HashMap<String, ArrayList<Subscription>> users_subscribes = new HashMap<>();
     private static final HashMap<String, ArrayList<Message>> queues = new HashMap<>();
     private final String new_line = System.lineSeparator();
@@ -30,13 +30,15 @@ public class MainServerEndpoint {
         // Liste des websockets connectés
         users.put(session.getId(), id);
         // Liste des utilisateurs et si ils sont connectés en STOMP
-        users_connected.put(id, false);
+        users_connected.put(id, 0);
         users_sessions.put(id, session);
     }
 
     @OnMessage
     public void onMessage(Session session, String message, @PathParam("username") String id) throws IOException {
-        if (users_connected.get(id)) {
+        if (users_connected.get(id) == 1) {
+            System.out.println("SEND");
+            System.out.println(users_subscribes.get(id));
             Trame trame = TrameConstructor.parseTrameClient(message);
             switch (trame.getType()) {
                 case "SEND":
@@ -65,6 +67,7 @@ public class MainServerEndpoint {
                     break;
             }
         } else {
+            System.out.println("FIRST");
             firstConnexion(session, message, id);
         }
     }
@@ -73,23 +76,23 @@ public class MainServerEndpoint {
     public void onClose(Session session, @PathParam("username") String id) {
         serverEndpoints.remove(this);
         users_connected.remove(id);
-        users_connected.replace(id, false);
+        users_connected.replace(id, 0);
         users_sessions.remove(id);
     }
 
     @OnError
     public void onError(Session session, @PathParam("username") String id, Throwable throwable) {
-        users_connected.replace(id, false);
+//        users_connected.replace(id, 0);
     }
 
 
-    private static void firstConnexion(Session session, String message, @PathParam("username") String id) throws IOException {
+    private static void firstConnexion(Session session, String message, String id) throws IOException {
         if (users_connected.containsKey(id)) {
-            if (!users_connected.get(id)) {
+            if (users_connected.get(id) == 0) {
                 Trame trame = TrameConstructor.parseTrameClient(message);
                 if (trame.isCONNECT() && trame.isValidCONNECT()) {
                     Trame res = TrameConstructor.createTrame("CONNECTED", new HashMap<>(Map.of("version", "1.0", "content-type", "text/plain")), "");
-                    users_connected.replace(id, true);
+                    users_connected.replace(id, 1);
                     session.getBasicRemote().sendText(res.toSend());
                 } else {
                     sendError(session, trame, "First Frame is not a correct CONNECT frame");
@@ -125,11 +128,11 @@ public class MainServerEndpoint {
                 for (Subscription subscription : y) {
                     if (subscription.getDestination().equals(destination)) {
                         while (subscription.getCursor() < size_queue) {
-                            subscription.setCursor(subscription.getCursor() + 1);
                             Trame trame = TrameConstructor.createTrame("MESSAGE", new HashMap<>(Map.of(
                                     "subscription", String.valueOf(subscription.getId()), "message-id",
                                     String.valueOf(subscription.getCursor()), "destination", destination,
                                     "content-type", "text/plain")), queues.get(destination).get(subscription.getCursor()).getContent());
+                            subscription.setCursor(subscription.getCursor() + 1);
                             try {
                                 users_sessions.get(id).getBasicRemote().sendText(trame.toSend());
                             } catch (IOException e) {
@@ -165,9 +168,14 @@ public class MainServerEndpoint {
                 ArrayList<Message> liste = new ArrayList<>();
                 queues.put(destination, liste);
             }
-            ArrayList<Subscription> subs = users_subscribes.get(id);
-            subs.add(sub);
-            users_subscribes.replace(id, subs);
+            if (users_subscribes.getOrDefault(id, null) == null) {
+                ArrayList<Subscription> subs = new ArrayList<>(List.of(sub));
+                users_subscribes.put(id, subs);
+            } else {
+                ArrayList<Subscription> subs = users_subscribes.get(id);
+                subs.add(sub);
+                users_subscribes.replace(id, subs);
+            }
             updateQueuesSEND(destination, id);
         }
     }

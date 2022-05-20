@@ -14,7 +14,7 @@ import static network.MainClientEndpoint.session;
 public class Controller {
 
 
-    private final int BOARD_SIZE=16;
+    private final int BOARD_SIZE = 16;
     public AnchorPane anchorpane;
     public BorderPane borderpane;
 
@@ -22,10 +22,10 @@ public class Controller {
 
     public void initialize() {
         gridpane = new GridPane();
-        for (int i =0; i<BOARD_SIZE; i++) {
-            for (int j =0; j<BOARD_SIZE; j++) {
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
                 Button btn = new Button(true);
-                gridpane.add(btn,i,j);
+                gridpane.add(btn, i, j);
             }
         }
         gridpane.setGridLinesVisible(true);
@@ -37,6 +37,6 @@ public class Controller {
     }
 
     public static void changeGrid(int x, int y, Button button) {
-            gridpane.add(button,y,x);
+        gridpane.add(button, y, x);
     }
 }

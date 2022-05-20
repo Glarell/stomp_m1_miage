@@ -12,6 +12,8 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ClientEndpoint
 public class MainClientEndpoint {
@@ -41,18 +43,35 @@ public class MainClientEndpoint {
     }
 
     @OnMessage
-    public void onMessage(String message, Session session) throws IOException {
+    public void onMessage(String message, Session session) {
         Trame trame = TrameConstructor.parseTrameServeur(message);
         if (trame != null) {
             if (!first_received){
                 first_received = true;
                 if (trame.isERROR()){
-                    session.close();
+                    try{
+                        session.close();
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
                 }else{
                     System.out.println(trame.toString());
                 }
             }else{
-                System.out.println(trame.toString());
+                Pattern pattern = Pattern.compile("\\(x:(?<x>\\d+),y:(?<y>\\d+)\\) - \\((?<start>false|true)->(?<end>true|false)\\)");
+                Matcher matcher = pattern.matcher("(x:10,y:9) - (true->false)");
+                System.out.println(matcher.groupCount());
+                if (matcher.find()) {
+                    System.out.println("Found value: " + matcher.group("x") );
+                    System.out.println("Found value: " + matcher.group("y") );
+                    System.out.println("Found value: " + matcher.group("end") );
+                    int x = Integer.parseInt(matcher.group("x"));
+                    int y = Integer.parseInt(matcher.group("y"));
+                    boolean value = Boolean.parseBoolean(matcher.group("end"));
+                    Controller.changeGrid(x,y, new Button(false));
+                } else {
+                    System.out.println("NO MATCH");
+                }
             }
         }
 
@@ -63,8 +82,9 @@ public class MainClientEndpoint {
         try{
             URI uri = new URI("ws://localhost:8080/stomp/main/enzo");
             session = client.connectToServer(MainClientEndpoint.class, uri);
+            session.getBasicRemote().sendText(TrameConstructor.createTrame("SUBSCRIBE", new HashMap<>(Map.of("destination", "test", "content-type","text/plain", "id","0")),"").toSend());
             App.main(args);
-        } catch (DeploymentException | URISyntaxException e) {
+        } catch (DeploymentException | URISyntaxException | IOException e) {
             e.printStackTrace();
         }
     }

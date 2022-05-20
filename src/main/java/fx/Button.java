@@ -28,10 +28,10 @@ public class Button extends javafx.scene.control.Button {
             int x = GridPane.getRowIndex(source);
             int y = GridPane.getColumnIndex(source);
             System.out.printf("Case - (x:%s,y:%s) - Couleur (%s->%s)\n", x, y,isWhite(),!isWhite());
-            Controller.changeGrid(x,y,new Button(!source.isWhite()));
+//            Controller.changeGrid(x,y,new Button(!source.isWhite()));
             String stringBuilder = "SEND" + new_line +
                     //HEADERS
-                    "destination:/queue/a" + new_line +
+                    "destination:test" + new_line +
                     "content-type:text/plain" + new_line +
                     // BLANK LINE
                     new_line +
