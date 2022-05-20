@@ -26,4 +26,12 @@ public class Message {
     public void setOffset(int offset) {
         this.offset = offset;
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "content='" + content + '\'' +
+                ", offset=" + offset +
+                '}';
+    }
 }

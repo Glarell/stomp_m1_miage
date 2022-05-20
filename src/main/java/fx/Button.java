@@ -1,13 +1,11 @@
 package fx;
 
-import javafx.event.EventHandler;
-import javafx.scene.Node;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 
 import java.io.IOException;
 
-import static network.MainClientEndpoint.session;
+import static fx.Controller.session;
+
 
 public class Button extends javafx.scene.control.Button {
     public static final String new_line = System.lineSeparator();

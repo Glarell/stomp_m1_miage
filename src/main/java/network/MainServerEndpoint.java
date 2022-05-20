@@ -38,7 +38,6 @@ public class MainServerEndpoint {
     public void onMessage(Session session, String message, @PathParam("username") String id) throws IOException {
         if (users_connected.get(id) == 1) {
             System.out.println("SEND");
-            System.out.println(users_subscribes.get(id));
             Trame trame = TrameConstructor.parseTrameClient(message);
             switch (trame.getType()) {
                 case "SEND":
@@ -134,7 +133,7 @@ public class MainServerEndpoint {
                                     "content-type", "text/plain")), queues.get(destination).get(subscription.getCursor()).getContent());
                             subscription.setCursor(subscription.getCursor() + 1);
                             try {
-                                users_sessions.get(id).getBasicRemote().sendText(trame.toSend());
+                                users_sessions.get(x).getBasicRemote().sendText(trame.toSend());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -168,7 +167,7 @@ public class MainServerEndpoint {
                 ArrayList<Message> liste = new ArrayList<>();
                 queues.put(destination, liste);
             }
-            if (users_subscribes.getOrDefault(id, null) == null) {
+            if (!users_subscribes.containsKey(id)) {
                 ArrayList<Subscription> subs = new ArrayList<>(List.of(sub));
                 users_subscribes.put(id, subs);
             } else {

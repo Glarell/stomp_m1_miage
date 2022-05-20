@@ -5,7 +5,9 @@ import fx.Button;
 import fx.Controller;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import org.glassfish.tyrus.client.ClientManager;
 
@@ -15,9 +17,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +26,6 @@ public class MainClientEndpoint {
 
     public final String new_line = System.lineSeparator();
     public boolean first_received = false;
-
     public static Session session;
 
     @OnOpen
@@ -71,9 +69,9 @@ public class MainClientEndpoint {
                     int x = Integer.parseInt(matcher.group("x"));
                     int y = Integer.parseInt(matcher.group("y"));
                     boolean value = Boolean.parseBoolean(matcher.group("end"));
-                    Platform.runLater(() -> {
-                        Controller.changeGrid(x, y, new Button(value));
-                    });
+                    /*Platform.runLater(() -> {
+                            Controller.changeGrid(x, y, new Button(value));
+                    });*/
                 } else {
                     System.out.println("NO MATCH");
                 }
@@ -83,14 +81,14 @@ public class MainClientEndpoint {
     }
 
     public static void main(String[] args){
-        ClientManager client = ClientManager.createClient();
+        /*ClientManager client = ClientManager.createClient();
         try{
             URI uri = new URI("ws://localhost:8080/stomp/main/enzo");
-            session = client.connectToServer(MainClientEndpoint.class, uri);
-            session.getBasicRemote().sendText(TrameConstructor.createTrame("SUBSCRIBE", new HashMap<>(Map.of("destination", "test", "content-type","text/plain", "id",args[0])),"").toSend());
+            session = client.connectToServer(this, uri);
+            session.getBasicRemote().sendText(TrameConstructor.createTrame("SUBSCRIBE", new HashMap<>(Map.of("destination", "test", "content-type","text/plain", "id",args[1])),"").toSend());
             App.main(args);
         } catch (DeploymentException | URISyntaxException | IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

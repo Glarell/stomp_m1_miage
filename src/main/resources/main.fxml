@@ -7,7 +7,8 @@
    <children>
       <BorderPane fx:id="borderpane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
-            <AnchorPane fx:id="anchorpane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+            <AnchorPane fx:id="anchorpane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            </AnchorPane>
          </center>
       </BorderPane>
    </children>

@@ -35,4 +35,13 @@ public class Subscription {
     public void setCursor(int cursor) {
         this.cursor = cursor;
     }
+
+    @Override
+    public String toString() {
+        return "Subscription{" +
+                "id='" + id + '\'' +
+                ", destination='" + destination + '\'' +
+                ", cursor=" + cursor +
+                '}';
+    }
 }

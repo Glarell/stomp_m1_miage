@@ -3,19 +3,33 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.ul.miage</groupId>
     <artifactId>stomp</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>Stomp</name>
     <description>Projet STOMP M1 Miage</description>
 
     <properties>
         <project.build.sourceEncoding>UTF8</project.build.sourceEncoding>
         <project.bindist.dir>${project.basedir}/bindist</project.bindist.dir>
-        <project.main.classname>${project.groupId}.${project.artifactId}.fx.Launcher</project.main.classname>
+        <project.main.classname>Launcher</project.main.classname>
         <project.bin.appname>run</project.bin.appname>
     </properties>
 
     <build>
         <plugins>
+            <plugin>
+                <!-- Build an executable JAR -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>Launcher</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
