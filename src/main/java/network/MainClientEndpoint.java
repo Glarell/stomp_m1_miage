@@ -27,8 +27,9 @@ public class MainClientEndpoint {
             // TYPE
             String stringBuilder = "CONNECT" + new_line +
                     //HEADERS
-                    "accept-version:1.0" + new_line +
+                    "version:1.0" + new_line +
                     "host:localhost" + new_line +
+                    "content-type:text/plain" + new_line +
                     // BLANK LINE
                     new_line +
                     // END
@@ -62,8 +63,7 @@ public class MainClientEndpoint {
         try{
             URI uri = new URI("ws://localhost:8080/stomp/main/enzo");
             Session session = client.connectToServer(MainClientEndpoint.class, uri);
-//            App.main(args);
-//            session.getBasicRemote().sendText(TrameConstructor.createTrame("TEST", null, "Bonjour les gens").toSend());
+            App.main(args);
             while(true){
 
             }
