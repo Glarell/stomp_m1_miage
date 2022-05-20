@@ -22,4 +22,10 @@ Un client souhaite se déconnecter :
 Il faut gérer la/les queues, une queue contient toutes les informations d'un topic
 On peut avoir plusieurs queues
 
-On doit gérer les abonnements et la position du curseur des différents clients sur cet abonnnement.
+On doit gérer les abonnements et la position du curseur des différents clients sur cet abonnement.
+
+Dans le cas d'un SUBSCRIBE :
+- Si la destination n'existe pas, créé la destination et abonner l'utilisateur
+- Si la destination existe, abonner l'utilisateur
+!!! Placer tout les curseurs à zéro pour les nouveaux arrivants !!!
+

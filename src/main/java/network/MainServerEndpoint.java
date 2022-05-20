@@ -4,10 +4,9 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 
@@ -17,63 +16,22 @@ public class MainServerEndpoint {
     private static final Logger logger = Logger.getLogger(MainServerEndpoint.class.getName());
     private static final Set<MainServerEndpoint> serverEndpoints = new CopyOnWriteArraySet<>();
     private static final HashMap<String, String> users = new HashMap<>();
+    private static final HashMap<String, Session> users_sessions = new HashMap<>();
     private static final HashMap<String, Boolean> users_connected = new HashMap<>();
-    private static final HashMap<String, String> users_queues = new HashMap<>();
+    private static final HashMap<String, ArrayList<Subscription>> users_subscribes = new HashMap<>();
+    private static final HashMap<String, ArrayList<Message>> queues = new HashMap<>();
     private final String new_line = System.lineSeparator();
     private Session session;
-
-    private static void broadcast(String message) {
-        serverEndpoints.forEach(endpoint -> {
-            synchronized (endpoint) {
-                try {
-                    endpoint.session.getBasicRemote().sendText(message);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    private static void firstConnexion(Session session, String message, @PathParam("username") String id) throws IOException {
-        if (users_connected.containsKey(id)) {
-            if (users_connected.get(id) == false) {
-                Trame trame = TrameConstructor.parseTrameClient(message);
-                if (trame.isCONNECT()) {
-                    Trame res = TrameConstructor.createTrame("CONNECTED", new HashMap<>(Map.of("version", "1.0", "content-type", "text/plain")), "");
-                    users_connected.replace(id, true);
-                    session.getBasicRemote().sendText(res.toSend());
-                } else {
-                    sendError(session, trame, "First Frame is not a correct CONNECT frame");
-                }
-            }
-        } else {
-            logger.info("Cet utilisateur n'est pas connecté au serveur !");
-        }
-    }
-
-    private static void manageSEND(Session session, String message, @PathParam("username") String id) {
-        System.out.println("SEND");
-    }
-
-    private static void manageSUBSCRIBE(Session session, String message, @PathParam("username") String id) {
-        System.out.println("SUBSCRIBE");
-    }
-
-    private static void manageUNSUBSCRIBE(Session session, String message, @PathParam("username") String id) {
-        System.out.println("UNSUBSCRIBE");
-    }
-
-    private static void sendError(Session session, Trame message, String reason) throws IOException {
-        Trame trame = TrameConstructor.createTrame("ERROR", new HashMap(Map.of("content-type", "text/plain", "message", reason)), message.toString());
-        session.getBasicRemote().sendText(trame.toSend());
-    }
 
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String id) {
         this.session = session;
-//        serverEndpoints.add(this);
+        serverEndpoints.add(this);
+        // Liste des websockets connectés
         users.put(session.getId(), id);
+        // Liste des utilisateurs et si ils sont connectés en STOMP
         users_connected.put(id, false);
+        users_sessions.put(id, session);
     }
 
     @OnMessage
@@ -83,22 +41,21 @@ public class MainServerEndpoint {
             switch (trame.getType()) {
                 case "SEND":
                     if (trame.isValidSEND()) {
-                        System.out.println(trame.toString());
+                        manageSEND(session, message, id);
                     } else {
                         sendError(session, trame, "SEND malformed");
                     }
                     break;
                 case "SUBSCRIBE":
                     if (trame.isValidSUBSCRIBE()) {
-                        System.out.println(trame.toString());
+                        manageSUBSCRIBE(session, message, id);
                     } else {
                         sendError(session, trame, "SUBSCRIBE malformed");
                     }
-                    users_queues.put(id, trame.getBody());
                     break;
                 case "UNSUBSCRIBE":
                     if (trame.isValidUNSUBSCRIBE()) {
-                        System.out.println(trame.toString());
+                        manageUNSUBSCRIBE(session, message, id);
                     } else {
                         sendError(session, trame, "UNSUBSCRIBE malformed");
                     }
@@ -117,10 +74,123 @@ public class MainServerEndpoint {
         serverEndpoints.remove(this);
         users_connected.remove(id);
         users_connected.replace(id, false);
+        users_sessions.remove(id);
     }
 
     @OnError
     public void onError(Session session, @PathParam("username") String id, Throwable throwable) {
         users_connected.replace(id, false);
     }
+
+
+    private static void firstConnexion(Session session, String message, @PathParam("username") String id) throws IOException {
+        if (users_connected.containsKey(id)) {
+            if (!users_connected.get(id)) {
+                Trame trame = TrameConstructor.parseTrameClient(message);
+                if (trame.isCONNECT() && trame.isValidCONNECT()) {
+                    Trame res = TrameConstructor.createTrame("CONNECTED", new HashMap<>(Map.of("version", "1.0", "content-type", "text/plain")), "");
+                    users_connected.replace(id, true);
+                    session.getBasicRemote().sendText(res.toSend());
+                } else {
+                    sendError(session, trame, "First Frame is not a correct CONNECT frame");
+                }
+            }
+        } else {
+            logger.info("Cet utilisateur n'est pas connecté au serveur !");
+        }
+    }
+
+    private static void manageSEND(Session session, String message, @PathParam("username") String id) {
+        Trame trame = TrameConstructor.parseTrameClient(message);
+        if (trame.isValidSEND()) {
+            String destination = trame.getHeaders().get("destination");
+            String body = trame.getBody();
+            if (queues.containsKey(destination)) {
+                ArrayList<Message> queue = queues.get(destination);
+                queue.add(new Message(body, queue.size() + 1));
+                queues.replace(destination, queue);
+            } else {
+                ArrayList<Message> queue = new ArrayList<>(List.of(new Message(body, 1)));
+                queues.put(destination, queue);
+            }
+            updateQueuesSEND(destination, id);
+        }
+
+    }
+
+    private static void updateQueuesSEND(String destination, @PathParam("username") String id) {
+        int size_queue = queues.get(destination).size();
+        users_subscribes.forEach((x, y) -> {
+            synchronized (y) {
+                for (Subscription subscription : y) {
+                    if (subscription.getDestination().equals(destination)) {
+                        while (subscription.getCursor() < size_queue) {
+                            subscription.setCursor(subscription.getCursor() + 1);
+                            Trame trame = TrameConstructor.createTrame("MESSAGE", new HashMap<>(Map.of(
+                                    "subscription", String.valueOf(subscription.getId()), "message-id",
+                                    String.valueOf(subscription.getCursor()), "destination", destination,
+                                    "content-type", "text/plain")), queues.get(destination).get(subscription.getCursor()).getContent());
+                            try {
+                                users_sessions.get(id).getBasicRemote().sendText(trame.toSend());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private static void manageSUBSCRIBE(Session session, String message, @PathParam("username") String id) {
+        Trame trame = TrameConstructor.parseTrameClient(message);
+        String destination = trame.getHeaders().get("destination");
+        String id_sub = trame.getHeaders().get("id");
+        Subscription sub = new Subscription(id_sub, destination);
+        AtomicBoolean condition = new AtomicBoolean(false);
+        users_subscribes.forEach((x, y) -> {
+            for (Subscription subscription : y) {
+                if (subscription.getId().equals(id_sub)) {
+                    try {
+                        sendError(session, trame, "Already a subscription with this id");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    condition.set(true);
+                }
+            }
+        });
+        if (!condition.get()) {
+            if (!queues.containsKey(destination)) {
+                ArrayList<Message> liste = new ArrayList<>();
+                queues.put(destination, liste);
+            }
+            ArrayList<Subscription> subs = users_subscribes.get(id);
+            subs.add(sub);
+            users_subscribes.replace(id, subs);
+            updateQueuesSEND(destination, id);
+        }
+    }
+
+    private static void manageUNSUBSCRIBE(Session session, String message, @PathParam("username") String id) {
+        System.out.println("UNSUBSCRIBE");
+    }
+
+    private static void sendError(Session session, Trame message, String reason) throws IOException {
+        Trame trame = TrameConstructor.createTrame("ERROR", new HashMap(Map.of("content-type", "text/plain", "message", reason)), message.toString());
+        session.getBasicRemote().sendText(trame.toSend());
+    }
+
+    private static void broadcast(String message) {
+        serverEndpoints.forEach(endpoint -> {
+            synchronized (endpoint) {
+                try {
+                    endpoint.session.getBasicRemote().sendText(message);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
 }
