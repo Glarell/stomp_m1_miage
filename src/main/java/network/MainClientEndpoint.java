@@ -3,6 +3,10 @@ package network;
 import fx.App;
 import fx.Button;
 import fx.Controller;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import org.glassfish.tyrus.client.ClientManager;
 
 import javax.websocket.*;
@@ -12,8 +16,11 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 @ClientEndpoint
 public class MainClientEndpoint {
@@ -59,16 +66,14 @@ public class MainClientEndpoint {
                 }
             }else{
                 Pattern pattern = Pattern.compile("\\(x:(?<x>\\d+),y:(?<y>\\d+)\\) - \\((?<start>false|true)->(?<end>true|false)\\)");
-                Matcher matcher = pattern.matcher("(x:10,y:9) - (true->false)");
-                System.out.println(matcher.groupCount());
+                Matcher matcher = pattern.matcher(trame.getBody());
                 if (matcher.find()) {
-                    System.out.println("Found value: " + matcher.group("x") );
-                    System.out.println("Found value: " + matcher.group("y") );
-                    System.out.println("Found value: " + matcher.group("end") );
                     int x = Integer.parseInt(matcher.group("x"));
                     int y = Integer.parseInt(matcher.group("y"));
                     boolean value = Boolean.parseBoolean(matcher.group("end"));
-                    Controller.changeGrid(x,y, new Button(false));
+                    Platform.runLater(() -> {
+                        Controller.changeGrid(x, y, new Button(value));
+                    });
                 } else {
                     System.out.println("NO MATCH");
                 }
@@ -82,7 +87,7 @@ public class MainClientEndpoint {
         try{
             URI uri = new URI("ws://localhost:8080/stomp/main/enzo");
             session = client.connectToServer(MainClientEndpoint.class, uri);
-            session.getBasicRemote().sendText(TrameConstructor.createTrame("SUBSCRIBE", new HashMap<>(Map.of("destination", "test", "content-type","text/plain", "id","0")),"").toSend());
+            session.getBasicRemote().sendText(TrameConstructor.createTrame("SUBSCRIBE", new HashMap<>(Map.of("destination", "test", "content-type","text/plain", "id",args[0])),"").toSend());
             App.main(args);
         } catch (DeploymentException | URISyntaxException | IOException e) {
             e.printStackTrace();

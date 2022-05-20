@@ -1,15 +1,10 @@
 package fx;
 
-import javafx.event.EventHandler;
-import javafx.scene.Node;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 
-import java.io.IOException;
 
-import static network.MainClientEndpoint.session;
 
 public class Controller {
 
