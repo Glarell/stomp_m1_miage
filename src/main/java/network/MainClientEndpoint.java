@@ -62,11 +62,8 @@ public class MainClientEndpoint {
         ClientManager client = ClientManager.createClient();
         try{
             URI uri = new URI("ws://localhost:8080/stomp/main/enzo");
-            Session session = client.connectToServer(MainClientEndpoint.class, uri);
+            session = client.connectToServer(MainClientEndpoint.class, uri);
             App.main(args);
-            while(true){
-
-            }
         } catch (DeploymentException | URISyntaxException e) {
             e.printStackTrace();
         }

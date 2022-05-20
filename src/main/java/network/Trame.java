@@ -42,7 +42,7 @@ public class Trame {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("--- Type de la trame : ").append(this.type).append(" ---\n");
         stringBuilder.append("--- Headers ---\n");
-        if (this.headers != null){
+        if (this.headers != null) {
             this.headers.forEach((x, y) -> stringBuilder.append(x).append(" : ").append(y).append("\n"));
         }
         stringBuilder.append("--- Body ---\n").append(this.body);
@@ -53,7 +53,7 @@ public class Trame {
         String new_line = System.lineSeparator();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(this.type).append(new_line);
-        if (this.headers != null){
+        if (this.headers != null) {
             this.headers.forEach((x, y) -> stringBuilder.append(x).append(":").append(y).append(new_line));
         }
         stringBuilder.append(new_line);
@@ -72,7 +72,9 @@ public class Trame {
         return this.type.equals("SUBSCRIBE");
     }
 
-    public boolean isUNSUBSCRIBE() { return this.type.equals("UNSUBSCRIBE"); }
+    public boolean isUNSUBSCRIBE() {
+        return this.type.equals("UNSUBSCRIBE");
+    }
 
     public boolean isDISCONNECT() {
         return this.type.equals("DISCONNECT");
@@ -84,7 +86,10 @@ public class Trame {
 
     public boolean isCONNECTED() {
         return this.type.equals("CONNECTED");
-    }{}
+    }
+
+    {
+    }
 
     public boolean isMESSAGE() {
         return this.type.equals("MESSAGE");
@@ -95,15 +100,15 @@ public class Trame {
     }
 
     public boolean isValidSUBSCRIBE() {
-        if (isSUBSCRIBE()){
-            if (this.headers.containsKey("destination") && this.headers.containsKey("id")){
-                try{
+        if (isSUBSCRIBE()) {
+            if (this.headers.containsKey("destination") && this.headers.containsKey("id")) {
+                try {
                     int temp = Integer.parseInt(this.headers.get("id"));
-                    if (this.headers.get("destination").isBlank() || this.headers.get("destination").isEmpty()){
+                    if (this.headers.get("destination").isBlank() || this.headers.get("destination").isEmpty()) {
                         return false;
                     }
                     return true;
-                }catch (NumberFormatException e){
+                } catch (NumberFormatException e) {
                     return false;
                 }
             }
@@ -111,10 +116,10 @@ public class Trame {
         return false;
     }
 
-    public boolean isValidCONNECT(){
-        if(isCONNECT()){
-            if (this.headers.containsKey("version") && this.headers.containsKey("content-type")){
-                if (this.headers.get("version").equals("1.0") && this.headers.get("content-type").equals("text/plain")){
+    public boolean isValidCONNECT() {
+        if (isCONNECT()) {
+            if (this.headers.containsKey("version") && this.headers.containsKey("content-type")) {
+                if (this.headers.get("version").equals("1.0") && this.headers.get("content-type").equals("text/plain")) {
                     return true;
                 }
             }
@@ -122,16 +127,16 @@ public class Trame {
         return false;
     }
 
-    public boolean isValidUNSUBSCRIBE(){
-        if (isUNSUBSCRIBE()){
-            if (this.headers.containsKey("destination") && this.headers.containsKey("id")){
-                try{
+    public boolean isValidUNSUBSCRIBE() {
+        if (isUNSUBSCRIBE()) {
+            if (this.headers.containsKey("destination") && this.headers.containsKey("id")) {
+                try {
                     int temp = Integer.parseInt(this.headers.get("id"));
-                    if (this.headers.get("destination").isBlank() || this.headers.get("destination").isEmpty()){
+                    if (this.headers.get("destination").isBlank() || this.headers.get("destination").isEmpty()) {
                         return false;
                     }
                     return true;
-                }catch (NumberFormatException e){
+                } catch (NumberFormatException e) {
                     return false;
                 }
             }
@@ -139,26 +144,20 @@ public class Trame {
         return false;
     }
 
-    public boolean isValidSEND(){
-        if (isSEND()){
-            if (this.headers.containsKey("destination") && this.headers.containsKey("id")){
-                try{
-                    int temp = Integer.parseInt(this.headers.get("id"));
-                    if (this.headers.get("destination").isBlank() || this.headers.get("destination").isEmpty()){
+    public boolean isValidSEND() {
+        if (isSEND()) {
+            if (this.headers.containsKey("destination") && this.headers.containsKey("content-type")) {
+                if (this.headers.get("destination").isBlank() || this.headers.get("destination").isEmpty()) {
+                    return false;
+                } else {
+                    if (this.getBody().isEmpty() || this.body.isBlank()) {
                         return false;
-                    }else{
-                        if (this.getBody().isEmpty() || this.body.isBlank()){
-                            return false;
-                        }else{
-                            return true;
-                        }
+                    } else {
+                        return true;
                     }
-                }catch (NumberFormatException e){
-                    e.printStackTrace();
                 }
             }
         }
         return false;
     }
-
 }
