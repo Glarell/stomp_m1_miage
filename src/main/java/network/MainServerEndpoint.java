@@ -19,8 +19,11 @@ public class MainServerEndpoint {
     private static final Logger logger = Logger.getLogger(MainServerEndpoint.class.getName());
     private static final Set<MainServerEndpoint> serverEndpoints = new CopyOnWriteArraySet<>();
     private static final HashMap<String, String> users = new HashMap<>();
+    // Liste de toutes les sessions des utilisateurs (pour leur envoyer des messages)
     private static final HashMap<String, Session> users_sessions = new HashMap<>();
+    // Liste des clients connectés sous STOMP
     private static final HashMap<String, Integer> users_connected = new HashMap<>();
+    // Liste des abonnements des clients
     private static final HashMap<String, ArrayList<Subscription>> users_subscribes = new HashMap<>();
     private static final HashMap<String, ArrayList<Message>> queues = new HashMap<>();
 
@@ -33,19 +36,9 @@ public class MainServerEndpoint {
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String id) {
         serverEndpoints.add(this);
-        // Liste des websockets connectés
         users.put(session.getId(), id);
-        // Liste des utilisateurs et si ils sont connectés en STOMP
         users_connected.put(id, 0);
         users_sessions.put(id, session);
-    }
-
-    private static void manageUNSUBSCRIBE(Session session, String message, @PathParam("username") String id) {
-        Trame trame = TrameConstructor.parseTrameClient(message);
-        String id_sub = trame.getHeaders().get("id");
-        users_subscribes.forEach((x, y) -> {
-            y.removeIf(subscription -> subscription.getId().equals(id_sub));
-        });
     }
 
     /**
@@ -74,7 +67,14 @@ public class MainServerEndpoint {
     public void onError(Session session, @PathParam("username") String id, Throwable throwable) {
     }
 
-
+    /**
+     * Permet au serveur de valider la connexion de l'utilisateur
+     *
+     * @param session
+     * @param message
+     * @param id
+     * @throws IOException
+     */
     private static void firstConnexion(Session session, String message, String id) throws IOException {
         if (users_connected.containsKey(id)) {
             if (users_connected.get(id) == 0) {
@@ -93,6 +93,13 @@ public class MainServerEndpoint {
         }
     }
 
+    /**
+     * Gère l'envoi de message des clients, et met à jour les queues et les abonnements
+     *
+     * @param session
+     * @param message
+     * @param id
+     */
     private static void manageSEND(Session session, String message, @PathParam("username") String id) {
         Trame trame = TrameConstructor.parseTrameClient(message);
         String destination = trame.getHeaders().get("destination");
@@ -108,6 +115,12 @@ public class MainServerEndpoint {
         updateQueuesSEND(destination, id);
     }
 
+    /**
+     * Met à jour les queues et envoie les modifications aux clients abonnés
+     *
+     * @param destination nom de la queue
+     * @param id          du client
+     */
     private static void updateQueuesSEND(String destination, @PathParam("username") String id) {
         int size_queue = queues.get(destination).size();
         users_subscribes.forEach((x, y) -> {
@@ -132,6 +145,13 @@ public class MainServerEndpoint {
         });
     }
 
+    /**
+     * Permet aux clients de s'abonner à une queue
+     *
+     * @param session
+     * @param message
+     * @param id
+     */
     private static void manageSUBSCRIBE(Session session, String message, @PathParam("username") String id) {
         Trame trame = TrameConstructor.parseTrameClient(message);
         String destination = trame.getHeaders().get("destination");
@@ -167,6 +187,30 @@ public class MainServerEndpoint {
         }
     }
 
+
+    /**
+     * Permet au serveur de désabonner les clients
+     *
+     * @param session
+     * @param message
+     * @param id
+     */
+    private static void manageUNSUBSCRIBE(Session session, String message, @PathParam("username") String id) {
+        Trame trame = TrameConstructor.parseTrameClient(message);
+        String id_sub = trame.getHeaders().get("id");
+        users_subscribes.forEach((x, y) -> {
+            y.removeIf(subscription -> subscription.getId().equals(id_sub));
+        });
+    }
+
+    /**
+     * Méthode qui envoie des erreurs sur mesure aux clients
+     *
+     * @param session
+     * @param message
+     * @param reason
+     * @throws IOException
+     */
     private static void sendError(Session session, Trame message, String reason) throws IOException {
         Trame trame = TrameConstructor.createTrame("ERROR", new HashMap<>(Map.of("content-type", "text/plain", "message", reason)), message.toString());
         session.getBasicRemote().sendText(trame.toSend());
