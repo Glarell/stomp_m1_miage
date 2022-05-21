@@ -20,7 +20,6 @@ public class MainServerEndpoint {
     private static final HashMap<String, Integer> users_connected = new HashMap<>();
     private static final HashMap<String, ArrayList<Subscription>> users_subscribes = new HashMap<>();
     private static final HashMap<String, ArrayList<Message>> queues = new HashMap<>();
-    private final String new_line = System.lineSeparator();
     private Session session;
 
     @OnOpen
@@ -76,12 +75,12 @@ public class MainServerEndpoint {
         serverEndpoints.remove(this);
         users_connected.remove(id);
         users_connected.replace(id, 0);
+        users_subscribes.remove(id);
         users_sessions.remove(id);
     }
 
     @OnError
     public void onError(Session session, @PathParam("username") String id, Throwable throwable) {
-//        users_connected.replace(id, 0);
     }
 
 
@@ -104,20 +103,17 @@ public class MainServerEndpoint {
 
     private static void manageSEND(Session session, String message, @PathParam("username") String id) {
         Trame trame = TrameConstructor.parseTrameClient(message);
-        if (trame.isValidSEND()) {
-            String destination = trame.getHeaders().get("destination");
-            String body = trame.getBody();
-            if (queues.containsKey(destination)) {
-                ArrayList<Message> queue = queues.get(destination);
-                queue.add(new Message(body, queue.size() + 1));
-                queues.replace(destination, queue);
-            } else {
-                ArrayList<Message> queue = new ArrayList<>(List.of(new Message(body, 1)));
-                queues.put(destination, queue);
-            }
-            updateQueuesSEND(destination, id);
+        String destination = trame.getHeaders().get("destination");
+        String body = trame.getBody();
+        if (queues.containsKey(destination)) {
+            ArrayList<Message> queue = queues.get(destination);
+            queue.add(new Message(body, queue.size() + 1));
+            queues.replace(destination, queue);
+        } else {
+            ArrayList<Message> queue = new ArrayList<>(List.of(new Message(body, 1)));
+            queues.put(destination, queue);
         }
-
+        updateQueuesSEND(destination, id);
     }
 
     private static void updateQueuesSEND(String destination, @PathParam("username") String id) {
@@ -180,24 +176,17 @@ public class MainServerEndpoint {
     }
 
     private static void manageUNSUBSCRIBE(Session session, String message, @PathParam("username") String id) {
-        System.out.println("UNSUBSCRIBE");
+        Trame trame = TrameConstructor.parseTrameClient(message);
+        String destination = trame.getHeaders().get("destination");
+        String id_sub = trame.getHeaders().get("id");
+        users_subscribes.forEach((x, y) -> {
+            y.removeIf(subscription -> subscription.getId().equals(id_sub) && subscription.getDestination().equals(destination));
+        });
     }
 
     private static void sendError(Session session, Trame message, String reason) throws IOException {
         Trame trame = TrameConstructor.createTrame("ERROR", new HashMap(Map.of("content-type", "text/plain", "message", reason)), message.toString());
         session.getBasicRemote().sendText(trame.toSend());
-    }
-
-    private static void broadcast(String message) {
-        serverEndpoints.forEach(endpoint -> {
-            synchronized (endpoint) {
-                try {
-                    endpoint.session.getBasicRemote().sendText(message);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 
 }
