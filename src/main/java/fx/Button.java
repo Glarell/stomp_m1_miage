@@ -44,7 +44,7 @@ public class Button extends javafx.scene.control.Button {
             Button source = (Button) e.getSource();
             int x = GridPane.getRowIndex(source);
             int y = GridPane.getColumnIndex(source);
-            Trame trame = TrameConstructor.createTrame("SEND", new HashMap<>(Map.of("destination", "test", "content-type", "text/plain")),
+            Trame trame = TrameConstructor.createTrame("SEND", new HashMap<>(Map.of("destination", "/queue/r-place", "content-type", "text/plain")),
                     String.format("(x:%s,y:%s) - (%s->%s)",
                             x,
                             y,

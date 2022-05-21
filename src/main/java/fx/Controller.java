@@ -79,6 +79,7 @@ public class Controller {
 
     /**
      * Initialize.
+     * Créé une instance client (websocket & javafx) et s'abonne à une queue (ici: /queue/r-place)
      */
     public void initialize() {
         if (gridpane == null) {
@@ -101,7 +102,7 @@ public class Controller {
         try {
             URI uri = new URI("ws://localhost:8080/stomp/main/" + client_name);
             session = client.connectToServer(this, uri);
-            session.getBasicRemote().sendText(TrameConstructor.createTrame("SUBSCRIBE", new HashMap<>(Map.of("destination", "test", "content-type", "text/plain", "id", client_name)), "").toSend());
+            session.getBasicRemote().sendText(TrameConstructor.createTrame("SUBSCRIBE", new HashMap<>(Map.of("destination", "/queue/r-place", "content-type", "text/plain", "id", client_name)), "").toSend());
             this.label_client.setText(String.format("Client %s", client_name));
             this.label_sub.setText("Subscribed");
             logger.info(String.format("Le client %s s'est [%s]", client_name, this.label_sub.getText()));
@@ -112,7 +113,7 @@ public class Controller {
     }
 
     /**
-     * Change grid.
+     * Change l'état (true=Blanc, false=Noir) d'un bouton dans la grille du client
      *
      * @param x      the x
      * @param y      the y
@@ -127,7 +128,7 @@ public class Controller {
     }
 
     /**
-     * On open.
+     * A l'ouverture d'un socket client, une trame connect est envoyée au serveur
      *
      * @param session the session
      */
@@ -143,7 +144,7 @@ public class Controller {
     }
 
     /**
-     * On message.
+     * Récupère les messages du serveur afin de modifier la grille
      *
      * @param message the message
      * @param session the session
@@ -185,7 +186,7 @@ public class Controller {
     }
 
     /**
-     * On action sub.
+     * Permettre au client de s'abonner ou désabonner via un bouton
      *
      * @param e the e
      * @throws IOException the io exception
@@ -201,7 +202,7 @@ public class Controller {
             isSubscribe = false;
         } else {
             trame = TrameConstructor.createTrame("SUBSCRIBE",
-                    new HashMap<>(Map.of("destination", "test", "content-type", "text/plain", "id", client_name)),
+                    new HashMap<>(Map.of("destination", "/queue/r-place", "content-type", "text/plain", "id", client_name)),
                     "");
             this.btn_sub.setText("Unsubscribe");
             this.label_sub.setText("Subscribed");
