@@ -23,7 +23,6 @@ public class MainServerEndpoint {
     private static final HashMap<String, Integer> users_connected = new HashMap<>();
     private static final HashMap<String, ArrayList<Subscription>> users_subscribes = new HashMap<>();
     private static final HashMap<String, ArrayList<Message>> queues = new HashMap<>();
-    private Session session;
 
     /**
      * On open.
@@ -33,7 +32,6 @@ public class MainServerEndpoint {
      */
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String id) {
-        this.session = session;
         serverEndpoints.add(this);
         // Liste des websockets connectés
         users.put(session.getId(), id);
