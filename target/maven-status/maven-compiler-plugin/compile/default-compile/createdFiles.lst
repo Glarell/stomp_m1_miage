@@ -7,5 +7,4 @@ network\TrameConstructor.class
 network\MainServerEndpoint.class
 fx\Controller.class
 network\Subscription.class
-network\MainClientEndpoint.class
 fx\Button.class

@@ -6,13 +6,17 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static fx.App.client_name;
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * The type Trame client test.
+ */
 @DisplayName("TrameClient")
 public class TrameClientTest {
 
+    /**
+     * Test send.
+     */
     @Test
     public void testSend() {
         Trame trame = TrameConstructor.createTrame("SEND",
@@ -26,6 +30,9 @@ public class TrameClientTest {
         assertThat(trame.isValidDISCONNECT()).isFalse();
     }
 
+    /**
+     * Test subscribe.
+     */
     @Test
     public void testSubscribe() {
         Trame trame = TrameConstructor.createTrame("SUBSCRIBE",
@@ -38,6 +45,9 @@ public class TrameClientTest {
         assertThat(trame.isValidDISCONNECT()).isFalse();
     }
 
+    /**
+     * Test unsubscribe.
+     */
     @Test
     public void testUnsubscribe() {
         Trame trame = TrameConstructor.createTrame("UNSUBSCRIBE",
@@ -50,6 +60,9 @@ public class TrameClientTest {
         assertThat(trame.isValidDISCONNECT()).isFalse();
     }
 
+    /**
+     * Test disconnect.
+     */
     @Test
     public void testDisconnect() {
         Trame trame = TrameConstructor.createTrame("DISCONNECT",
@@ -62,6 +75,9 @@ public class TrameClientTest {
         assertThat(trame.isValidDISCONNECT()).isTrue();
     }
 
+    /**
+     * Test connect.
+     */
     @Test
     public void testConnect() {
         Trame trame = TrameConstructor.createTrame("CONNECT",

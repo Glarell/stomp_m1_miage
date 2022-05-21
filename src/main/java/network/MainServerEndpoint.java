@@ -81,7 +81,8 @@ public class MainServerEndpoint {
         if (users_connected.containsKey(id)) {
             if (users_connected.get(id) == 0) {
                 Trame trame = TrameConstructor.parseTrameClient(message);
-                if (trame.isCONNECT() && trame.isValidCONNECT()) {
+                if (trame.isValidCONNECT()) {
+                    logger.info(String.format("Une trame [CONNECTED] a été reçu du client [%s], son contenu : \n%s", id, trame));
                     Trame res = TrameConstructor.createTrame("CONNECTED", new HashMap<>(Map.of("version", "1.0", "content-type", "text/plain")), "");
                     users_connected.replace(id, 1);
                     session.getBasicRemote().sendText(res.toSend());
@@ -184,12 +185,11 @@ public class MainServerEndpoint {
     @OnMessage
     public void onMessage(Session session, String message, @PathParam("username") String id) throws IOException {
         if (users_connected.get(id) == 1) {
-            System.out.println("SEND");
             Trame trame = TrameConstructor.parseTrameClient(message);
-            System.out.println(trame);
             switch (trame.getType()) {
                 case "SEND":
                     if (trame.isValidSEND()) {
+                        logger.info(String.format("Une trame [SEND] a été reçu du client [%s], son contenu : \n%s", id, trame));
                         manageSEND(session, message, id);
                     } else {
                         sendError(session, trame, "SEND malformed");
@@ -197,6 +197,7 @@ public class MainServerEndpoint {
                     break;
                 case "SUBSCRIBE":
                     if (trame.isValidSUBSCRIBE()) {
+                        logger.info(String.format("Une trame [SUBSCRIBE] a été reçu du client [%s], son contenu : \n%s", id, trame));
                         manageSUBSCRIBE(session, message, id);
                     } else {
                         sendError(session, trame, "SUBSCRIBE malformed");
@@ -204,17 +205,18 @@ public class MainServerEndpoint {
                     break;
                 case "UNSUBSCRIBE":
                     if (trame.isValidUNSUBSCRIBE()) {
+                        logger.info(String.format("Une trame [UNSUBSCRIBE] a été reçu du client [%s], son contenu : \n%s", id, trame));
                         manageUNSUBSCRIBE(session, message, id);
                     } else {
                         sendError(session, trame, "UNSUBSCRIBE malformed");
                     }
                     break;
                 default:
+                    logger.info(String.format("Une trame [UNRECOGNIZED] a été reçu du client [%s], son contenu : \n%s", id, trame));
                     sendError(session, trame, "No Default FRAMES recognized");
                     break;
             }
         } else {
-            System.out.println("FIRST");
             firstConnexion(session, message, id);
         }
     }

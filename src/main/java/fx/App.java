@@ -25,7 +25,10 @@ public class App extends Application {
 	 */
 	public static void main(String[] args) {
 		UUID randomUUID = UUID.randomUUID();
-		client_name = randomUUID.toString().replaceAll("[a-z]", "0").substring(0, 8);
+		client_name = randomUUID.
+				toString().
+				replaceAll("[a-z]",
+						String.valueOf((int) (Math.random() * 10))).substring(0, 8);
 		launch(args);
 	}
 

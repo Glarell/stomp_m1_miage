@@ -7,7 +7,9 @@ import network.TrameConstructor;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
+import static fx.App.client_name;
 import static fx.Controller.session;
 
 
@@ -15,6 +17,8 @@ import static fx.Controller.session;
  * The type Button.
  */
 public class Button extends javafx.scene.control.Button {
+    private static final Logger logger = Logger.getLogger(Button.class.getName());
+
     /**
      * The constant new_line.
      */
@@ -48,6 +52,7 @@ public class Button extends javafx.scene.control.Button {
                             !isWhite()));
             try {
                 if (Controller.isSubscribe) {
+                    logger.info(String.format("Le client %s envoi un message : \n\t(x:%s,y:%s) - (%s->%s)", client_name, x, y, isWhite(), !isWhite()));
                     session.getBasicRemote().sendText(trame.toSend());
                 }
             } catch (IOException ex) {

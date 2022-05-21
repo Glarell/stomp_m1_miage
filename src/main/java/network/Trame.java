@@ -259,11 +259,47 @@ public class Trame {
         return false;
     }
 
+    /**
+     * Is valid disconnect boolean.
+     *
+     * @return the boolean
+     */
     public boolean isValidDISCONNECT() {
-        if (isDISCONNECT()) {
-            return this.headers.containsKey("receipt") && this.getBody().isEmpty();
-        } else {
-            return false;
-        }
+        return this.headers.containsKey("receipt") &&
+                this.getBody().isEmpty() &&
+                isDISCONNECT();
+    }
+
+    /**
+     * Is valid message boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isValidMESSAGE() {
+        return isMESSAGE() &&
+                this.headers.containsKey("subscription") &&
+                this.headers.containsKey("message-id") &&
+                this.headers.containsKey("destination") &&
+                this.headers.containsKey("content-type");
+    }
+
+    /**
+     * Is valid error boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isValidERROR() {
+        return isERROR() &&
+                this.headers.containsKey("version") &&
+                this.headers.containsKey("content-type");
+    }
+
+    /**
+     * Is valid connected boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isValidCONNECTED() {
+        return isCONNECTED() && this.headers.containsKey("version");
     }
 }

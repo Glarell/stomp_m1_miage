@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +28,7 @@ import static fx.App.client_name;
  */
 @ClientEndpoint
 public class Controller {
+    private static final Logger logger = Logger.getLogger(Controller.class.getName());
 
     /**
      * The constant isSubscribe.
@@ -102,6 +104,7 @@ public class Controller {
             session.getBasicRemote().sendText(TrameConstructor.createTrame("SUBSCRIBE", new HashMap<>(Map.of("destination", "test", "content-type", "text/plain", "id", client_name)), "").toSend());
             this.label_client.setText(String.format("Client %s", client_name));
             this.label_sub.setText("Subscribed");
+            logger.info(String.format("Le client %s s'est [%s]", client_name, this.label_sub.getText()));
             isSubscribe = true;
         } catch (DeploymentException | URISyntaxException | IOException e) {
             e.printStackTrace();
@@ -157,10 +160,10 @@ public class Controller {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }else{
+                } else {
                     System.out.println(trame.toString());
                 }
-            }else{
+            } else if (trame.isValidMESSAGE()) {
                 Pattern pattern = Pattern.compile("\\(x:(?<x>\\d+),y:(?<y>\\d+)\\) - \\((?<start>false|true)->(?<end>true|false)\\)");
                 Matcher matcher = pattern.matcher(trame.getBody());
                 if (matcher.find()) {
@@ -169,6 +172,7 @@ public class Controller {
                     boolean value = Boolean.parseBoolean(matcher.group("end"));
                     Platform.runLater(() -> {
                         try {
+                            logger.info(String.format("Le client %s a reçu un message : \n\t(x:%s,y:%s) - (%s->%s)", client_name, x, y, !value, value));
                             changeGrid(x, y, new Button(value));
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -203,6 +207,7 @@ public class Controller {
             this.label_sub.setText("Subscribed");
             isSubscribe = true;
         }
+        logger.info(String.format("Le client %s s'est [%s]", client_name, this.label_sub.getText()));
         session.getBasicRemote().sendText(trame.toSend());
     }
 }
