@@ -211,6 +211,17 @@ public class MainServerEndpoint {
                         sendError(session, trame, "UNSUBSCRIBE malformed");
                     }
                     break;
+                case "DISCONNECT":
+                    if (trame.isValidDISCONNECT()) {
+                        logger.info(String.format("Une trame [DISCONNECT] a été reçu du client [%s], son contenu : \n%s", id, trame));
+                        users.remove(session.getId());
+                        users_connected.remove(id);
+                        users_subscribes.remove(id);
+                        users_sessions.remove(id);
+                    } else {
+                        sendError(session, trame, "DISCONNECT malformed");
+                    }
+                    break;
                 default:
                     logger.info(String.format("Une trame [UNRECOGNIZED] a été reçu du client [%s], son contenu : \n%s", id, trame));
                     sendError(session, trame, "No Default FRAMES recognized");

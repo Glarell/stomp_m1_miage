@@ -5,7 +5,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import network.Trame;
+import network.TrameConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -44,5 +48,14 @@ public class App extends Application {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void stop() throws Exception {
+		Trame trame = TrameConstructor.createTrame("DISCONNECT",
+				new HashMap<>(Map.of("receipt", client_name)),
+				"");
+		Controller.session.getBasicRemote().sendText(trame.toSend());
+		Controller.session.close();
 	}
 }
