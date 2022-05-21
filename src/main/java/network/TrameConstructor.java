@@ -12,7 +12,7 @@ public class TrameConstructor {
     /**
      * The constant client_headers.
      */
-    public static final ArrayList<String> client_headers = new ArrayList<>(List.of("SEND", "SUBSCRIBE", "DISCONNECT", "CONNECT"));
+    public static final ArrayList<String> client_headers = new ArrayList<>(List.of("SEND", "SUBSCRIBE", "UNSUBSCRIBE", "DISCONNECT", "CONNECT"));
     /**
      * The constant server_headers.
      */
@@ -80,14 +80,5 @@ public class TrameConstructor {
         return parse(message, server_headers);
     }
 
-    /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
-     */
-    public static void main(String[] args) {
-        String test = "SEND\r\ndestination:/queue/a\r\ncontent-type:text/plain\r\n\r\nCoucou les gens\r\n^@";
-        System.out.println(parseTrameClient(test).toString());
-    }
 }
 

@@ -1,6 +1,7 @@
 package fx;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
@@ -28,19 +29,21 @@ import static fx.App.client_name;
 public class Controller {
 
     /**
+     * The constant isSubscribe.
+     */
+    public static boolean isSubscribe;
+
+    /**
      * The constant session.
      */
     public static Session session;
-    /**
-     * The New line.
-     */
-    public final String new_line = System.lineSeparator();
     /**
      * The First received.
      */
     public boolean first_received = false;
 
     private final int BOARD_SIZE = 16;
+
     /**
      * The Anchorpane.
      */
@@ -62,6 +65,15 @@ public class Controller {
      */
     @FXML
     public Label label_client;
+    /**
+     * The Label sub.
+     */
+    @FXML
+    public Label label_sub;
+    /**
+     * The Btn sub.
+     */
+    public javafx.scene.control.Button btn_sub;
 
     /**
      * Initialize.
@@ -84,12 +96,13 @@ public class Controller {
         anchorpane.getChildren().add(gridpane);
 
         ClientManager client = ClientManager.createClient();
-        this.label_client.setText("Client "+client_name);
         try {
-            System.out.println(client_name);
             URI uri = new URI("ws://localhost:8080/stomp/main/" + client_name);
             session = client.connectToServer(this, uri);
             session.getBasicRemote().sendText(TrameConstructor.createTrame("SUBSCRIBE", new HashMap<>(Map.of("destination", "test", "content-type", "text/plain", "id", client_name)), "").toSend());
+            this.label_client.setText(String.format("Client %s", client_name));
+            this.label_sub.setText("Subscribed");
+            isSubscribe = true;
         } catch (DeploymentException | URISyntaxException | IOException e) {
             e.printStackTrace();
         }
@@ -118,17 +131,9 @@ public class Controller {
     @OnOpen
     public void onOpen(Session session) {
         try {
-            // TYPE
-            String stringBuilder = "CONNECT" + new_line +
-                    //HEADERS
-                    "version:1.0" + new_line +
-                    "host:localhost" + new_line +
-                    "content-type:text/plain" + new_line +
-                    // BLANK LINE
-                    new_line +
-                    // END
-                    "^@";
-            session.getBasicRemote().sendText(stringBuilder);
+            Trame trame = TrameConstructor.createTrame("CONNECT", new HashMap<>(Map.of("version", "1.0", "host", "localhost", "content-type", "text/plain")),
+                    "");
+            session.getBasicRemote().sendText(trame.toSend());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -164,17 +169,40 @@ public class Controller {
                     boolean value = Boolean.parseBoolean(matcher.group("end"));
                     Platform.runLater(() -> {
                         try {
-                            System.out.println("ENVOOIIIEE: "+x+y);
                             changeGrid(x, y, new Button(value));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     });
-                } else {
-                    System.out.println("NO MATCH");
                 }
             }
         }
 
+    }
+
+    /**
+     * On action sub.
+     *
+     * @param e the e
+     * @throws IOException the io exception
+     */
+    public void onActionSub(ActionEvent e) throws IOException {
+        Trame trame;
+        if (btn_sub.getText().equals("Unsubscribe")) {
+            trame = TrameConstructor.createTrame("UNSUBSCRIBE",
+                    new HashMap<>(Map.of("id", client_name)),
+                    "");
+            this.btn_sub.setText("Subscribe");
+            this.label_sub.setText("Unsubscribed");
+            isSubscribe = false;
+        } else {
+            trame = TrameConstructor.createTrame("SUBSCRIBE",
+                    new HashMap<>(Map.of("destination", "test", "content-type", "text/plain", "id", client_name)),
+                    "");
+            this.btn_sub.setText("Unsubscribe");
+            this.label_sub.setText("Subscribed");
+            isSubscribe = true;
+        }
+        session.getBasicRemote().sendText(trame.toSend());
     }
 }

@@ -229,12 +229,9 @@ public class Trame {
      */
     public boolean isValidUNSUBSCRIBE() {
         if (isUNSUBSCRIBE()) {
-            if (this.headers.containsKey("destination") && this.headers.containsKey("id")) {
+            if (this.headers.containsKey("id")) {
                 try {
-                    int temp = Integer.parseInt(this.headers.get("id"));
-                    if (this.headers.get("destination").isBlank() || this.headers.get("destination").isEmpty()) {
-                        return false;
-                    }
+                    Integer.parseInt(this.headers.get("id"));
                     return true;
                 } catch (NumberFormatException e) {
                     return false;
@@ -255,14 +252,18 @@ public class Trame {
                 if (this.headers.get("destination").isBlank() || this.headers.get("destination").isEmpty()) {
                     return false;
                 } else {
-                    if (this.getBody().isEmpty() || this.body.isBlank()) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return !this.getBody().isEmpty() && !this.body.isBlank();
                 }
             }
         }
         return false;
+    }
+
+    public boolean isValidDISCONNECT() {
+        if (isDISCONNECT()) {
+            return this.headers.containsKey("receipt") && this.getBody().isEmpty();
+        } else {
+            return false;
+        }
     }
 }

@@ -1,8 +1,12 @@
 package fx;
 
 import javafx.scene.layout.GridPane;
+import network.Trame;
+import network.TrameConstructor;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static fx.Controller.session;
 
@@ -14,7 +18,7 @@ public class Button extends javafx.scene.control.Button {
     /**
      * The constant new_line.
      */
-    public static final String new_line = System.lineSeparator();
+    private final int CASE_SIZE = 25;
 
     private boolean isWhite;
 
@@ -25,8 +29,8 @@ public class Button extends javafx.scene.control.Button {
      */
     public Button(boolean isWhite) {
         this.isWhite = isWhite;
-        this.setMinWidth(50);
-        this.setMinHeight(50);
+        this.setMinWidth(CASE_SIZE);
+        this.setMinHeight(CASE_SIZE);
         if (isWhite) {
             this.setStyle("-fx-background-color: white");
         } else {
@@ -36,24 +40,16 @@ public class Button extends javafx.scene.control.Button {
             Button source = (Button) e.getSource();
             int x = GridPane.getRowIndex(source);
             int y = GridPane.getColumnIndex(source);
-            System.out.printf("Case - (x:%s,y:%s) - Couleur (%s->%s)\n", x, y,isWhite(),!isWhite());
-//            Controller.changeGrid(x,y,new Button(!source.isWhite()));
-            String stringBuilder = "SEND" + new_line +
-                    //HEADERS
-                    "destination:test" + new_line +
-                    "content-type:text/plain" + new_line +
-                    // BLANK LINE
-                    new_line +
-                    //CONTENT
+            Trame trame = TrameConstructor.createTrame("SEND", new HashMap<>(Map.of("destination", "test", "content-type", "text/plain")),
                     String.format("(x:%s,y:%s) - (%s->%s)",
                             x,
                             y,
                             isWhite(),
-                            !isWhite()) + new_line +
-                    // END
-                    "^@";
+                            !isWhite()));
             try {
-                session.getBasicRemote().sendText(stringBuilder);
+                if (Controller.isSubscribe) {
+                    session.getBasicRemote().sendText(trame.toSend());
+                }
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }

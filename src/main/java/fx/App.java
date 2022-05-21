@@ -26,7 +26,6 @@ public class App extends Application {
 	public static void main(String[] args) {
 		UUID randomUUID = UUID.randomUUID();
 		client_name = randomUUID.toString().replaceAll("[a-z]", "0").substring(0, 8);
-		System.out.println(client_name);
 		launch(args);
 	}
 

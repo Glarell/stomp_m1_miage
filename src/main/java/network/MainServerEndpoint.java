@@ -42,49 +42,12 @@ public class MainServerEndpoint {
         users_sessions.put(id, session);
     }
 
-    /**
-     * On message.
-     *
-     * @param session the session
-     * @param message the message
-     * @param id      the id
-     * @throws IOException the io exception
-     */
-    @OnMessage
-    public void onMessage(Session session, String message, @PathParam("username") String id) throws IOException {
-        if (users_connected.get(id) == 1) {
-            System.out.println("SEND");
-            Trame trame = TrameConstructor.parseTrameClient(message);
-            switch (trame.getType()) {
-                case "SEND":
-                    if (trame.isValidSEND()) {
-                        manageSEND(session, message, id);
-                    } else {
-                        sendError(session, trame, "SEND malformed");
-                    }
-                    break;
-                case "SUBSCRIBE":
-                    if (trame.isValidSUBSCRIBE()) {
-                        manageSUBSCRIBE(session, message, id);
-                    } else {
-                        sendError(session, trame, "SUBSCRIBE malformed");
-                    }
-                    break;
-                case "UNSUBSCRIBE":
-                    if (trame.isValidUNSUBSCRIBE()) {
-                        manageUNSUBSCRIBE(session, message, id);
-                    } else {
-                        sendError(session, trame, "UNSUBSCRIBE malformed");
-                    }
-                    break;
-                default:
-                    sendError(session, trame, "No Default FRAMES recognized");
-                    break;
-            }
-        } else {
-            System.out.println("FIRST");
-            firstConnexion(session, message, id);
-        }
+    private static void manageUNSUBSCRIBE(Session session, String message, @PathParam("username") String id) {
+        Trame trame = TrameConstructor.parseTrameClient(message);
+        String id_sub = trame.getHeaders().get("id");
+        users_subscribes.forEach((x, y) -> {
+            y.removeIf(subscription -> subscription.getId().equals(id_sub));
+        });
     }
 
     /**
@@ -205,18 +168,55 @@ public class MainServerEndpoint {
         }
     }
 
-    private static void manageUNSUBSCRIBE(Session session, String message, @PathParam("username") String id) {
-        Trame trame = TrameConstructor.parseTrameClient(message);
-        String destination = trame.getHeaders().get("destination");
-        String id_sub = trame.getHeaders().get("id");
-        users_subscribes.forEach((x, y) -> {
-            y.removeIf(subscription -> subscription.getId().equals(id_sub) && subscription.getDestination().equals(destination));
-        });
+    private static void sendError(Session session, Trame message, String reason) throws IOException {
+        Trame trame = TrameConstructor.createTrame("ERROR", new HashMap<>(Map.of("content-type", "text/plain", "message", reason)), message.toString());
+        session.getBasicRemote().sendText(trame.toSend());
     }
 
-    private static void sendError(Session session, Trame message, String reason) throws IOException {
-        Trame trame = TrameConstructor.createTrame("ERROR", new HashMap(Map.of("content-type", "text/plain", "message", reason)), message.toString());
-        session.getBasicRemote().sendText(trame.toSend());
+    /**
+     * On message.
+     *
+     * @param session the session
+     * @param message the message
+     * @param id      the id
+     * @throws IOException the io exception
+     */
+    @OnMessage
+    public void onMessage(Session session, String message, @PathParam("username") String id) throws IOException {
+        if (users_connected.get(id) == 1) {
+            System.out.println("SEND");
+            Trame trame = TrameConstructor.parseTrameClient(message);
+            System.out.println(trame);
+            switch (trame.getType()) {
+                case "SEND":
+                    if (trame.isValidSEND()) {
+                        manageSEND(session, message, id);
+                    } else {
+                        sendError(session, trame, "SEND malformed");
+                    }
+                    break;
+                case "SUBSCRIBE":
+                    if (trame.isValidSUBSCRIBE()) {
+                        manageSUBSCRIBE(session, message, id);
+                    } else {
+                        sendError(session, trame, "SUBSCRIBE malformed");
+                    }
+                    break;
+                case "UNSUBSCRIBE":
+                    if (trame.isValidUNSUBSCRIBE()) {
+                        manageUNSUBSCRIBE(session, message, id);
+                    } else {
+                        sendError(session, trame, "UNSUBSCRIBE malformed");
+                    }
+                    break;
+                default:
+                    sendError(session, trame, "No Default FRAMES recognized");
+                    break;
+            }
+        } else {
+            System.out.println("FIRST");
+            firstConnexion(session, message, id);
+        }
     }
 
 }
