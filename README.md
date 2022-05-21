@@ -11,4 +11,4 @@ stomp-specification-1.2.html
 ### Contributors
 - CISTERNINO Enzo
 - TONDON César
-- XY François
+- XU François
