@@ -10,6 +10,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 
+/**
+ * The type Main server endpoint.
+ */
 @ServerEndpoint(value = "/main/{username}")
 public class MainServerEndpoint {
 
@@ -22,6 +25,12 @@ public class MainServerEndpoint {
     private static final HashMap<String, ArrayList<Message>> queues = new HashMap<>();
     private Session session;
 
+    /**
+     * On open.
+     *
+     * @param session the session
+     * @param id      the id
+     */
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String id) {
         this.session = session;
@@ -33,6 +42,14 @@ public class MainServerEndpoint {
         users_sessions.put(id, session);
     }
 
+    /**
+     * On message.
+     *
+     * @param session the session
+     * @param message the message
+     * @param id      the id
+     * @throws IOException the io exception
+     */
     @OnMessage
     public void onMessage(Session session, String message, @PathParam("username") String id) throws IOException {
         if (users_connected.get(id) == 1) {
@@ -70,6 +87,12 @@ public class MainServerEndpoint {
         }
     }
 
+    /**
+     * On close.
+     *
+     * @param session the session
+     * @param id      the id
+     */
     @OnClose
     public void onClose(Session session, @PathParam("username") String id) {
         serverEndpoints.remove(this);
@@ -79,6 +102,13 @@ public class MainServerEndpoint {
         users_sessions.remove(id);
     }
 
+    /**
+     * On error.
+     *
+     * @param session   the session
+     * @param id        the id
+     * @param throwable the throwable
+     */
     @OnError
     public void onError(Session session, @PathParam("username") String id, Throwable throwable) {
     }
