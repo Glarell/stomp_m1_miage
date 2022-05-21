@@ -2,38 +2,78 @@ package network;
 
 import java.util.HashMap;
 
+/**
+ * The type Trame.
+ */
 public class Trame {
 
     private String type;
     private HashMap<String, String> headers;
     private String body;
 
+    /**
+     * Instantiates a new Trame.
+     *
+     * @param type    the type
+     * @param headers the headers
+     * @param body    the body
+     */
     public Trame(String type, HashMap<String, String> headers, String body) {
         this.type = type;
         this.headers = headers;
         this.body = body;
     }
 
+    /**
+     * Gets type.
+     *
+     * @return the type
+     */
     public String getType() {
         return type;
     }
 
+    /**
+     * Sets type.
+     *
+     * @param type the type
+     */
     public void setType(String type) {
         this.type = type;
     }
 
+    /**
+     * Gets headers.
+     *
+     * @return the headers
+     */
     public HashMap<String, String> getHeaders() {
         return headers;
     }
 
+    /**
+     * Sets headers.
+     *
+     * @param headers the headers
+     */
     public void setHeaders(HashMap<String, String> headers) {
         this.headers = headers;
     }
 
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
     public String getBody() {
         return body;
     }
 
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     */
     public void setBody(String body) {
         this.body = body;
     }
@@ -49,6 +89,11 @@ public class Trame {
         return stringBuilder.toString();
     }
 
+    /**
+     * To send string.
+     *
+     * @return the string
+     */
     public String toSend() {
         String new_line = System.lineSeparator();
         StringBuilder stringBuilder = new StringBuilder();
@@ -64,26 +109,56 @@ public class Trame {
         return stringBuilder.toString();
     }
 
+    /**
+     * Is send boolean.
+     *
+     * @return the boolean
+     */
     public boolean isSEND() {
         return this.type.equals("SEND");
     }
 
+    /**
+     * Is subscribe boolean.
+     *
+     * @return the boolean
+     */
     public boolean isSUBSCRIBE() {
         return this.type.equals("SUBSCRIBE");
     }
 
+    /**
+     * Is unsubscribe boolean.
+     *
+     * @return the boolean
+     */
     public boolean isUNSUBSCRIBE() {
         return this.type.equals("UNSUBSCRIBE");
     }
 
+    /**
+     * Is disconnect boolean.
+     *
+     * @return the boolean
+     */
     public boolean isDISCONNECT() {
         return this.type.equals("DISCONNECT");
     }
 
+    /**
+     * Is connect boolean.
+     *
+     * @return the boolean
+     */
     public boolean isCONNECT() {
         return this.type.equals("CONNECT");
     }
 
+    /**
+     * Is connected boolean.
+     *
+     * @return the boolean
+     */
     public boolean isCONNECTED() {
         return this.type.equals("CONNECTED");
     }
@@ -91,14 +166,29 @@ public class Trame {
     {
     }
 
+    /**
+     * Is message boolean.
+     *
+     * @return the boolean
+     */
     public boolean isMESSAGE() {
         return this.type.equals("MESSAGE");
     }
 
+    /**
+     * Is error boolean.
+     *
+     * @return the boolean
+     */
     public boolean isERROR() {
         return this.type.equals("ERROR");
     }
 
+    /**
+     * Is valid subscribe boolean.
+     *
+     * @return the boolean
+     */
     public boolean isValidSUBSCRIBE() {
         if (isSUBSCRIBE()) {
             if (this.headers.containsKey("destination") && this.headers.containsKey("id")) {
@@ -116,6 +206,11 @@ public class Trame {
         return false;
     }
 
+    /**
+     * Is valid connect boolean.
+     *
+     * @return the boolean
+     */
     public boolean isValidCONNECT() {
         if (isCONNECT()) {
             if (this.headers.containsKey("version") && this.headers.containsKey("content-type")) {
@@ -127,6 +222,11 @@ public class Trame {
         return false;
     }
 
+    /**
+     * Is valid unsubscribe boolean.
+     *
+     * @return the boolean
+     */
     public boolean isValidUNSUBSCRIBE() {
         if (isUNSUBSCRIBE()) {
             if (this.headers.containsKey("destination") && this.headers.containsKey("id")) {
@@ -144,6 +244,11 @@ public class Trame {
         return false;
     }
 
+    /**
+     * Is valid send boolean.
+     *
+     * @return the boolean
+     */
     public boolean isValidSEND() {
         if (isSEND()) {
             if (this.headers.containsKey("destination") && this.headers.containsKey("content-type")) {

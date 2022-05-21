@@ -2,6 +2,7 @@ package fx;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -20,21 +21,51 @@ import java.util.regex.Pattern;
 
 import static fx.App.client_name;
 
+/**
+ * The type Controller.
+ */
 @ClientEndpoint
 public class Controller {
 
-    public final String new_line = System.lineSeparator();
-    public boolean first_received = false;
+    /**
+     * The constant session.
+     */
     public static Session session;
+    /**
+     * The New line.
+     */
+    public final String new_line = System.lineSeparator();
+    /**
+     * The First received.
+     */
+    public boolean first_received = false;
 
     private final int BOARD_SIZE = 16;
+    /**
+     * The Anchorpane.
+     */
     @FXML
     public AnchorPane anchorpane;
+    /**
+     * The Borderpane.
+     */
     @FXML
     public BorderPane borderpane;
 
+    /**
+     * The Gridpane.
+     */
+    @FXML
     public GridPane gridpane;
+    /**
+     * The Label client.
+     */
+    @FXML
+    public Label label_client;
 
+    /**
+     * Initialize.
+     */
     public void initialize() {
         if (gridpane == null) {
             gridpane = new GridPane();
@@ -53,16 +84,24 @@ public class Controller {
         anchorpane.getChildren().add(gridpane);
 
         ClientManager client = ClientManager.createClient();
-        try{
+        this.label_client.setText("Client "+client_name);
+        try {
             System.out.println(client_name);
-            URI uri = new URI("ws://localhost:8080/stomp/main/"+ client_name);
+            URI uri = new URI("ws://localhost:8080/stomp/main/" + client_name);
             session = client.connectToServer(this, uri);
-            session.getBasicRemote().sendText(TrameConstructor.createTrame("SUBSCRIBE", new HashMap<>(Map.of("destination", "test", "content-type","text/plain", "id",client_name)),"").toSend());
+            session.getBasicRemote().sendText(TrameConstructor.createTrame("SUBSCRIBE", new HashMap<>(Map.of("destination", "test", "content-type", "text/plain", "id", client_name)), "").toSend());
         } catch (DeploymentException | URISyntaxException | IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Change grid.
+     *
+     * @param x      the x
+     * @param y      the y
+     * @param button the button
+     */
     public void changeGrid(int x, int y, Button button) {
         try {
             this.gridpane.add(button, y, x);
@@ -71,9 +110,14 @@ public class Controller {
         }
     }
 
+    /**
+     * On open.
+     *
+     * @param session the session
+     */
     @OnOpen
     public void onOpen(Session session) {
-        try{
+        try {
             // TYPE
             String stringBuilder = "CONNECT" + new_line +
                     //HEADERS
@@ -90,16 +134,22 @@ public class Controller {
         }
     }
 
+    /**
+     * On message.
+     *
+     * @param message the message
+     * @param session the session
+     */
     @OnMessage
     public void onMessage(String message, Session session) {
         Trame trame = TrameConstructor.parseTrameServeur(message);
         if (trame != null) {
-            if (!first_received){
+            if (!first_received) {
                 first_received = true;
-                if (trame.isERROR()){
-                    try{
+                if (trame.isERROR()) {
+                    try {
                         session.close();
-                    }catch (IOException e){
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }else{

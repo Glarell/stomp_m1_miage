@@ -7,13 +7,24 @@ import java.io.IOException;
 import static fx.Controller.session;
 
 
+/**
+ * The type Button.
+ */
 public class Button extends javafx.scene.control.Button {
+    /**
+     * The constant new_line.
+     */
     public static final String new_line = System.lineSeparator();
 
     private boolean isWhite;
 
+    /**
+     * Instantiates a new Button.
+     *
+     * @param isWhite the is white
+     */
     public Button(boolean isWhite) {
-        this.isWhite=isWhite;
+        this.isWhite = isWhite;
         this.setMinWidth(50);
         this.setMinHeight(50);
         if (isWhite) {
@@ -49,10 +60,20 @@ public class Button extends javafx.scene.control.Button {
         });
     }
 
+    /**
+     * Is white boolean.
+     *
+     * @return the boolean
+     */
     public boolean isWhite() {
         return isWhite;
     }
 
+    /**
+     * Sets white.
+     *
+     * @param white the white
+     */
     public void setWhite(boolean white) {
         isWhite = white;
     }
